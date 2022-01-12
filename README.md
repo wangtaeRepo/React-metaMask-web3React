@@ -1,70 +1,129 @@
-# Getting Started with Create React App
+# React내에서 Metamask 연결하기
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 구현 조건
+연결하기 버튼을 통해 Metamask 연동 및 연결해제 되어야함
 
-## Available Scripts
+</br>
 
-In the project directory, you can run:
+## 개발환경 설정
+- @web3-react/core": "^6.1.9"
+- @web3-react/injected-connector": "^6.0.7"
+- @ethersproject/providers
+- "web3": "^1.6.1”
 
-### `npm start`
+</br>
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**설치 명령어**
+```
+pm install --save @web3-react/core": "^6.1.9"
+npm install --save @web3-react/injected-connector": "^6.0.7"
+npm install --save @ethersproject/providers
+npm install --save web3
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+</br>
 
-### `npm test`
+## Provide 설정하기
+ethersproject에서 제공해주는 Library를 사용하기 위해 component를 Provider로 감싸준다.
+```js
+// index.js
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+import { Web3Provider } from '@ethersproject/providers';
+import { Web3ReactProvider } from '@web3-react/core';
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+// getLibrary 함수를 props로 전달해준다.
+function getLibrary(provider){
+  const library=new Web3Provider(provider);
+  library.pollingInterval=12000; //
+  return library;
+}
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+ReactDOM.render(
+   <React.StrictMode>
+    {/* Component 내에서 사용할 수 있도록 Provider 감싸기 */}
+        <Web3ReactProvider getLibrary={getLibrary}>
+            <App />
+        </Web3ReactProvider>
+  </React.StrictMode>,
+document.getElementById('root')
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+</br>
 
-### `npm run eject`
+작업 환경이 구축되었다면 구현을 위해 아래와 같이 코드를 작성해준다.
+```
+import './cover.css'
+import { InjectedConnector } from '@web3-react/injected-connector'
+import { useWeb3React } from '@web3-react/core'
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+//contract MyNFT is ERC721,Ownable{
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+function App() {
+  // 지원되는 네트워크 주입
+  const injected = new InjectedConnector({
+    supportedChainIds: [1, 3, 4, 5, 42], //hardhat ropstan : 4,3
+  })
+  // const { active, account, library, connector, activate, deactivate } =
+  const { active, account, activate, deactivate } = useWeb3React()
+  async function connect() {
+    try {
+      await activate(injected)
+    } catch (ex) {
+      console.log(ex)
+    }
+  }
+  async function disconnect() {
+    try {
+      deactivate()
+    } catch (ex) {
+      console.log(ex)
+    }
+  }
+  return (
+    <>
+      <br></br>
+      <br></br>
+      <br></br>
+      <br></br>
+      <br></br>
+      <h1>MetaMask 연결하기</h1>
+      <div className="flex flex-col items-center justify-center">
+        <button
+          onClick={connect}
+          className="py-2 mt-20 mb-4 text-lg font-bold text-white rounded-lg w-56 bg-blue-600 hover:bg-blue-800"
+        >
+          Connect to MetaMask
+        </button>
+        <br></br>
+        <br></br>
+        <br></br>
+        <br></br>
+        {active ? (
+          <span>
+            Connected with <b>{account}</b>
+          </span>
+        ) : (
+          <span>Not connected</span>
+        )}
+        <br></br>
+        <br></br>
+        <br></br>
+        <br></br>
+        <button
+          onClick={disconnect}
+          className="py-2 mt-20 mb-4 text-lg font-bold text-white rounded-lg w-56 bg-blue-600 hover:bg-blue-800"
+        >
+          Disconnect
+        </button>
+        <br></br>
+        <br></br>
+        <br></br>
+        <br></br>
+      </div>
+    </>
+  )
+}
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+export default App
+```
