@@ -52,7 +52,7 @@ document.getElementById('root')
 </br>
 
 작업 환경이 구축되었다면 구현을 위해 아래와 같이 코드를 작성해준다.
-```
+```js
 import './cover.css'
 import { InjectedConnector } from '@web3-react/injected-connector'
 import { useWeb3React } from '@web3-react/core'
